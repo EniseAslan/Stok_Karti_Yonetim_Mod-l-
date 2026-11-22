@@ -1,0 +1,81 @@
+{
+  "stokKartlari": [
+    {
+      "id": 1,
+      "ad": "SSD 1TB NVMe",
+      "kod": "BT-001",
+      "kategori": "HAMMADDE",
+      "birim": "ADET",
+      "stokMiktari": 250,
+      "birimFiyat": 1850,
+      "durum": "AKTIF",
+      "depoId": 1,
+      "depoAdi": "Ana Depo"
+    },
+    {
+      "id": 2,
+      "ad": "Dizüstü Bilgisayar 16GB RAM",
+      "kod": "YM-014",
+      "kategori": "YARI_MAMUL",
+      "birim": "ADET",
+      "stokMiktari": 45,
+      "birimFiyat": 24500,
+      "durum": "AKTIF",
+      "depoId": 2,
+      "depoAdi": "Üretim Deposu"
+    },
+    {
+      "id": 3,
+      "ad": "Kablosuz Mouse",
+      "kod": "TM-203",
+      "kategori": "TICARI",
+      "birim": "ADET",
+      "stokMiktari": 0,
+      "birimFiyat": 420,
+      "durum": "PASIF",
+      "depoId": 1,
+      "depoAdi": "Ana Depo"
+    },
+    {
+      "id": 4,
+      "ad": "DDR4 8GB RAM Modülü",
+      "kod": "HM-002",
+      "kategori": "HAMMADDE",
+      "birim": "ADET",
+      "stokMiktari": 800,
+      "birimFiyat": 950,
+      "durum": "AKTIF",
+      "depoId": 1,
+      "depoAdi": "Ana Depo"
+    },
+    {
+      "id": 5,
+      "ad": "Mekanik Klavye RGB",
+      "kod": "TM-204",
+      "kategori": "TICARI",
+      "birim": "ADET",
+      "stokMiktari": 130,
+      "birimFiyat": 1250,
+      "durum": "AKTIF",
+      "depoId": 3,
+      "depoAdi": "Sevkiyat Deposu"
+    },
+    {
+      "id": 6,
+      "ad": "Güç Kaynağı 650W",
+      "kod": "YM-015",
+      "kategori": "YARI_MAMUL",
+      "birim": "ADET",
+      "stokMiktari": 75,
+      "birimFiyat": 2100,
+      "durum": "AKTIF",
+      "depoId": 2,
+      "depoAdi": "Üretim Deposu"
+    }
+  ],
+  "depolar": [
+    { "id": 1, "adi": "Ana Depo" },
+    { "id": 2, "adi": "Üretim Deposu" },
+    { "id": 3, "adi": "Sevkiyat Deposu" }
+  ]
+}
