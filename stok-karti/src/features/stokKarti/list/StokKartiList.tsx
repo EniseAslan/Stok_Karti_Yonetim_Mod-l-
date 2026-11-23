@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getStokKartlari } from '../../../api/stokKarti.api';
-import type { StokKarti } from '../../../types/stokKarti.types';
+import {
+  BIRIM_LABEL,
+  DURUM_LABEL,
+  KATEGORI_LABEL,
+  KATEGORI_OPTIONS,
+  type StokKarti,
+} from '../../../types/stokKarti.types';
 import styles from './StokKartiList.module.scss';
 
 function StokKartiList() {
@@ -27,13 +33,24 @@ function StokKartiList() {
   if (error) return <p>Hata: {error}</p>;
 
   return (
-    <div>
+ <div>
       <h1 className={styles.title}>Stok Kartları</h1>
       <Link to="/stok-karti/yeni">Yeni</Link>
+      <select>
+        {KATEGORI_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+
       <ul>
         {items.map((item) => (
           <li key={item.id}>
             <Link to={`/stok-karti/${item.id}`}>{item.ad}</Link>
+            {' — '}
+            {KATEGORI_LABEL[item.kategori]} · {BIRIM_LABEL[item.birim]} ·{' '}
+            {DURUM_LABEL[item.durum]}
           </li>
         ))}
       </ul>
