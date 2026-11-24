@@ -1,0 +1,60 @@
+$color-success-bg: #e6f4ea;
+$color-success-text: #1e6b34;
+$color-success-border: #b7e1c1;
+$radius-sm: 6px;
+$radius-md: 8px;
+$space-sm: 12px;
+$space-md: 16px;
+
+.notification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-sm;
+
+  margin: $space-sm 0;
+  padding: $space-sm $space-md;
+
+  border-radius: $radius-md;
+  line-height: 1.5;
+
+
+  &.success {
+    background: $color-success-bg;
+    color: $color-success-text;
+    border: 1px solid $color-success-border;
+  }
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+
+  width: 32px;
+  height: 32px;
+
+  background: none;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: 20px;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  &:active {
+    background: rgba(0, 0, 0, 0.12);
+  }
+}

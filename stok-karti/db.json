@@ -74,8 +74,17 @@
     }
   ],
   "depolar": [
-    { "id": 1, "adi": "Ana Depo" },
-    { "id": 2, "adi": "Üretim Deposu" },
-    { "id": 3, "adi": "Sevkiyat Deposu" }
+    {
+      "id": 1,
+      "adi": "Ana Depo"
+    },
+    {
+      "id": 2,
+      "adi": "Üretim Deposu"
+    },
+    {
+      "id": 3,
+      "adi": "Sevkiyat Deposu"
+    }
   ]
 }

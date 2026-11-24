@@ -9,3 +9,12 @@ export async function getStokKartlari(): Promise<StokKarti[]> {
   }
   return res.json();
 }
+
+export async function deleteStokKarti(id: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/stokKartlari/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    throw new Error(`Server error: ${res.status}`);
+  }
+}
