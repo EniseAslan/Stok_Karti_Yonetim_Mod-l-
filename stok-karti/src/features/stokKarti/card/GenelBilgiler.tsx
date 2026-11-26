@@ -1,139 +1,189 @@
-import type { FormikProps } from "formik";
-import type { FocusEvent } from "react";
+import type { FocusEvent, ReactNode } from 'react';
+import type { FormikProps } from 'formik';
 import {
   BIRIM_OPTIONS,
   DURUM_OPTIONS,
   KATEGORI_OPTIONS,
   type StokKartiForm,
-} from "../../../types/stokKarti.types";
+} from '../../../types/stokKarti.types';
+import { formatCurrency } from '../../../utils/project/stokKarti';
+import styles from './StokKartiCard.module.scss';
 
 interface GenelBilgilerProps {
   formik: FormikProps<StokKartiForm>;
   stokDegeri: number;
 }
+
+type ValidatedField = 'ad' | 'stokMiktari' | 'birimFiyat';
+
 const selectOnFocus = (e: FocusEvent<HTMLInputElement>) => e.target.select();
 
-function GenelBilgiler({ formik, stokDegeri }: GenelBilgilerProps) {
+interface FieldProps {
+  label: string;
+  htmlFor: string;
+  required?: boolean;
+  error?: string;
+  children: ReactNode;
+}
+
+function Field({
+  label,
+  htmlFor,
+  required = false,
+  error,
+  children,
+}: FieldProps) {
   return (
-    <section>
-      <h2>Genel Bilgiler</h2>
+    <div className={styles.field}>
+      <label
+        htmlFor={htmlFor}
+        className={`${styles.label} ${required ? styles.required : ''}`}
+      >
+        {label}
+      </label>
+      {children}
+      {error && <p className={styles.error}>{error}</p>}
+    </div>
+  );
+}
 
-      <div>
-        <label htmlFor="ad">Ad</label>
-        <input
-          id="ad"
-          name="ad"
-          type="text"
-          value={formik.values.ad}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-        />
-        {formik.touched.ad && formik.errors.ad && <p>{formik.errors.ad}</p>}
-      </div>
+function GenelBilgiler({ formik, stokDegeri }: GenelBilgilerProps) {
+  const error = (name: ValidatedField) =>
+    formik.touched[name] ? formik.errors[name] : undefined;
 
-      <div>
-        <label htmlFor="kod">Kod</label>
-        <input
-          id="kod"
-          name="kod"
-          type="text"
-          value={formik.values.kod}
-          onChange={formik.handleChange}
-        />
-      </div>
+  const inputClass = (name: ValidatedField) =>
+    `${styles.input} ${error(name) ? styles.invalid : ''}`;
 
-      <div>
-        <label htmlFor="kategori">Kategori</label>
-        <select
-          id="kategori"
-          name="kategori"
-          value={formik.values.kategori}
-          onChange={formik.handleChange}
-        >
-          {KATEGORI_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
+  return (
+    <>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Genel Bilgiler</h2>
 
-      <div>
-        <label htmlFor="birim">Birim</label>
-        <select
-          id="birim"
-          name="birim"
-          value={formik.values.birim}
-          onChange={formik.handleChange}
-        >
-          {BIRIM_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
+        <div className={styles.fields}>
+          <Field label="Stok Kodu" htmlFor="kod">
+            <input
+              id="kod"
+              name="kod"
+              type="text"
+              className={styles.input}
+              value={formik.values.kod}
+              onChange={formik.handleChange}
+            />
+          </Field>
 
-      <div>
-        <label htmlFor="stokMiktari">Stok Miktarı</label>
-        <input
-          id="stokMiktari"
-          name="stokMiktari"
-          type="number"
-          step="any"
-          value={formik.values.stokMiktari}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          onFocus={selectOnFocus}
-        />
-        {formik.touched.stokMiktari && formik.errors.stokMiktari && (
-          <p>{formik.errors.stokMiktari}</p>
-        )}
-      </div>
+          <Field label="Stok Adı" htmlFor="ad" required error={error('ad')}>
+            <input
+              id="ad"
+              name="ad"
+              type="text"
+              className={inputClass('ad')}
+              value={formik.values.ad}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </Field>
 
-      <div>
-        <label htmlFor="birimFiyat">Birim Fiyat (₺)</label>
-        <input
-          id="birimFiyat"
-          name="birimFiyat"
-          type="number"
-          step="any"
-          value={formik.values.birimFiyat}
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          onFocus={selectOnFocus}
-        />
-        {formik.touched.birimFiyat && formik.errors.birimFiyat && (
-          <p>{formik.errors.birimFiyat}</p>
-        )}
-      </div>
+          <Field label="Kategori" htmlFor="kategori">
+            <select
+              id="kategori"
+              name="kategori"
+              className={styles.input}
+              value={formik.values.kategori}
+              onChange={formik.handleChange}
+            >
+              {KATEGORI_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-      <div>
-        <label htmlFor="durum">Durum</label>
-        <select
-          id="durum"
-          name="durum"
-          value={formik.values.durum}
-          onChange={formik.handleChange}
-        >
-          {DURUM_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
+          <Field label="Birim" htmlFor="birim">
+            <select
+              id="birim"
+              name="birim"
+              className={styles.input}
+              value={formik.values.birim}
+              onChange={formik.handleChange}
+            >
+              {BIRIM_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-      <p>
-        Stok Değeri:{" "}
-        <strong>
-          {stokDegeri.toLocaleString("tr-TR", {
-            style: "currency",
-            currency: "TRY",
-          })}
-        </strong>
-      </p>
-    </section>
+          <Field label="Durum" htmlFor="durum">
+            <select
+              id="durum"
+              name="durum"
+              className={styles.input}
+              value={formik.values.durum}
+              onChange={formik.handleChange}
+            >
+              {DURUM_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Stok ve Fiyat</h2>
+
+        <div className={styles.fields}>
+          <Field
+            label="Stok Miktarı"
+            htmlFor="stokMiktari"
+            required
+            error={error('stokMiktari')}
+          >
+            <input
+              id="stokMiktari"
+              name="stokMiktari"
+              type="number"
+              step="any"
+              className={inputClass('stokMiktari')}
+              value={formik.values.stokMiktari}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              onFocus={selectOnFocus}
+            />
+          </Field>
+
+          <Field
+            label="Birim Fiyat (₺)"
+            htmlFor="birimFiyat"
+            required
+            error={error('birimFiyat')}
+          >
+            <input
+              id="birimFiyat"
+              name="birimFiyat"
+              type="number"
+              step="any"
+              className={inputClass('birimFiyat')}
+              value={formik.values.birimFiyat}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              onFocus={selectOnFocus}
+            />
+          </Field>
+
+          <div className={styles.valueBox}>
+            <span className={styles.valueLabel}>Stok Değeri</span>
+            <strong className={styles.valueAmount}>
+              {formatCurrency(stokDegeri)}
+            </strong>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 

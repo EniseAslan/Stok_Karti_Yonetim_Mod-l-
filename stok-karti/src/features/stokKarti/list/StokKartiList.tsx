@@ -6,12 +6,17 @@ import {
   BIRIM_LABEL,
   DURUM_LABEL,
   DURUM_OPTIONS,
+  Durum,
   KATEGORI_LABEL,
   KATEGORI_OPTIONS,
-  type Durum,
   type Kategori,
   type StokKarti,
 } from '../../../types/stokKarti.types';
+import {
+  formatCurrency,
+  formatNumber,
+  hesaplaStokDegeri,
+} from '../../../utils/project/stokKarti';
 import StokKartiCard from '../card/StokKartiCard';
 import styles from './StokKartiList.module.scss';
 
@@ -43,7 +48,7 @@ function StokKartiList() {
     load();
   }, []);
 
-
+ 
   const q = search.toLocaleLowerCase('tr-TR');
 
   const filtered = items.filter((item) => {
@@ -55,6 +60,13 @@ function StokKartiList() {
     const matchesDurum = durumFilter === 'ALL' || item.durum === durumFilter;
     return matchesSearch && matchesKategori && matchesDurum;
   });
+
+
+  const activeCount = filtered.filter((i) => i.durum === Durum.Aktif).length;
+  const totalValue = filtered.reduce(
+    (sum, i) => sum + hesaplaStokDegeri(i.stokMiktari, i.birimFiyat),
+    0,
+  );
 
   const showNotification = (message: string) => {
     setNotification(message);
@@ -82,12 +94,20 @@ function StokKartiList() {
     showNotification('Kayıt güncellendi');
   };
 
-  if (loading) return <p>Yükleniyor…</p>;
-  if (error) return <p>Hata: {error}</p>;
+  if (loading) return <p className={styles.page}>Yükleniyor…</p>;
+  if (error) return <p className={styles.page}>Hata: {error}</p>;
 
   return (
-    <div>
-      <h1 className={styles.title}>Stok Kartları</h1>
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <div>
+          <h1 className={styles.title}>Stok Kartları</h1>
+          <p className={styles.subtitle}>{filtered.length} kayıt listeleniyor</p>
+        </div>
+        <Link to="/stok-karti/yeni" className={styles.newButton}>
+          + Yeni Stok Kartı
+        </Link>
+      </header>
 
       {notification && (
         <Notification
@@ -96,17 +116,32 @@ function StokKartiList() {
         />
       )}
 
-      <div>
-        <Link to="/stok-karti/yeni">Yeni</Link>
+      <section className={styles.summary}>
+        <div className={styles.summaryCard}>
+          <span className={styles.summaryLabel}>Listelenen kalem</span>
+          <span className={styles.summaryValue}>{filtered.length}</span>
+        </div>
+        <div className={styles.summaryCard}>
+          <span className={styles.summaryLabel}>Aktif kart</span>
+          <span className={styles.summaryValue}>{activeCount}</span>
+        </div>
+        <div className={styles.summaryCard}>
+          <span className={styles.summaryLabel}>Toplam stok değeri</span>
+          <span className={styles.summaryValue}>{formatCurrency(totalValue)}</span>
+        </div>
+      </section>
 
+      <div className={styles.toolbar}>
         <input
           type="text"
+          className={styles.search}
           placeholder="Ad veya kod ara…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
 
         <select
+          className={styles.select}
           value={kategoriFilter}
           onChange={(e) => setKategoriFilter(e.target.value as KategoriFilter)}
         >
@@ -119,6 +154,7 @@ function StokKartiList() {
         </select>
 
         <select
+          className={styles.select}
           value={durumFilter}
           onChange={(e) => setDurumFilter(e.target.value as DurumFilter)}
         >
@@ -131,53 +167,137 @@ function StokKartiList() {
         </select>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Kod</th>
-            <th>Ad</th>
-            <th>Kategori</th>
-            <th>Birim</th>
-            <th>Stok Miktarı</th>
-            <th>Birim Fiyat</th>
-            <th>Durum</th>
-            <th>Depo</th>
-            <th>İşlemler</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.length === 0 ? (
+      <div className={styles.chips}>
+        {search !== '' && (
+          <span className={styles.chip}>
+            Arama: {search}
+            <button
+              type="button"
+              className={styles.chipClose}
+              aria-label="Aramayı temizle"
+              onClick={() => setSearch('')}
+            >
+              ×
+            </button>
+          </span>
+        )}
+        {kategoriFilter !== 'ALL' && (
+          <span className={styles.chip}>
+            Kategori: {KATEGORI_LABEL[kategoriFilter]}
+            <button
+              type="button"
+              className={styles.chipClose}
+              aria-label="Kategori filtresini temizle"
+              onClick={() => setKategoriFilter('ALL')}
+            >
+              ×
+            </button>
+          </span>
+        )}
+        {durumFilter !== 'ALL' && (
+          <span className={styles.chip}>
+            Durum: {DURUM_LABEL[durumFilter]}
+            <button
+              type="button"
+              className={styles.chipClose}
+              aria-label="Durum filtresini temizle"
+              onClick={() => setDurumFilter('ALL')}
+            >
+              ×
+            </button>
+          </span>
+        )}
+      </div>
+
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
             <tr>
-              <td colSpan={9}>Kayıt bulunamadı.</td>
+              <th>Kod</th>
+              <th>Ad</th>
+              <th>Kategori</th>
+              <th className={styles.numeric}>Stok</th>
+              <th className={styles.numeric}>Birim Fiyat</th>
+              <th>Durum</th>
+              <th>Depo</th>
+              <th>İşlemler</th>
             </tr>
-          ) : (
-            filtered.map((item) => (
-              <tr key={item.id}>
-                <td>{item.kod}</td>
-                <td>{item.ad}</td>
-                <td>{KATEGORI_LABEL[item.kategori]}</td>
-                <td>{BIRIM_LABEL[item.birim]}</td>
-                <td>{item.stokMiktari.toLocaleString('tr-TR')}</td>
-                <td>
-                  {item.birimFiyat.toLocaleString('tr-TR', {
-                    style: 'currency',
-                    currency: 'TRY',
-                  })}
-                </td>
-                <td>{DURUM_LABEL[item.durum]}</td>
-                <td>{item.depoAdi}</td>
-                <td>
-                  <Link to={`/stok-karti/${item.id}`}>Düzenle</Link>
-                  <button onClick={() => setQuickEditId(item.id)}>
-                    Hızlı Düzenle
-                  </button>
-                  <button onClick={() => handleDelete(item.id)}>Sil</button>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={8} className={styles.empty}>
+                  Kayıt bulunamadı.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              filtered.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <Link
+                      to={`/stok-karti/${item.id}`}
+                      className={styles.codeLink}
+                    >
+                      {item.kod}
+                    </Link>
+                  </td>
+                  <td className={styles.name}>{item.ad}</td>
+                  <td>{KATEGORI_LABEL[item.kategori]}</td>
+                  <td className={styles.numeric}>
+                    {formatNumber(item.stokMiktari)} {BIRIM_LABEL[item.birim]}
+                    {item.stokMiktari === 0 && (
+                      <span
+                        className={`${styles.badge} ${styles.badgeWarning} ${styles.stockNote}`}
+                      >
+                        Stok yok
+                      </span>
+                    )}
+                  </td>
+                  <td className={styles.numeric}>
+                    {formatCurrency(item.birimFiyat)}
+                  </td>
+                  <td>
+                    <span
+                      className={`${styles.badge} ${
+                        item.durum === Durum.Aktif
+                          ? styles.badgeActive
+                          : styles.badgePassive
+                      }`}
+                    >
+                      {DURUM_LABEL[item.durum]}
+                    </span>
+                  </td>
+                  <td className={styles.muted}>{item.depoAdi || '—'}</td>
+                  <td>
+                    <div className={styles.actions}>
+                      <Link
+                        to={`/stok-karti/${item.id}`}
+                        className={styles.actionButton}
+                      >
+                        Düzenle
+                      </Link>
+                      <button
+                        type="button"
+                        className={styles.actionButton}
+                        onClick={() => setQuickEditId(item.id)}
+                      >
+                        Hızlı
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.actionButton} ${styles.danger}`}
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        Sil
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {quickEditId !== null && (
         <StokKartiCard

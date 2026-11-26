@@ -35,7 +35,9 @@ function DepoModal({ onSelect, onClose }: DepoModalProps) {
         aria-modal="true"
         aria-labelledby="depo-modal-title"
       >
-        <h2 id="depo-modal-title">Depo Seç</h2>
+        <h2 id="depo-modal-title" className={styles.dialogTitle}>
+          Depo Seç
+        </h2>
 
         {loading && <p>Yükleniyor…</p>}
         {error && <p>Hata: {error}</p>}
@@ -56,9 +58,15 @@ function DepoModal({ onSelect, onClose }: DepoModalProps) {
           </ul>
         )}
 
-        <button type="button" onClick={onClose}>
-          Kapat
-        </button>
+        <div className={styles.dialogActions}>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={onClose}
+          >
+            Kapat
+          </button>
+        </div>
       </div>
     </div>
   );

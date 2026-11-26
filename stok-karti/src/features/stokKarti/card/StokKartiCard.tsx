@@ -9,12 +9,14 @@ import {
 } from '../../../api/stokKarti.api';
 import {
   Birim,
+  DURUM_LABEL,
   Durum,
   Kategori,
   type Depo,
   type StokKarti,
   type StokKartiForm,
 } from '../../../types/stokKarti.types';
+import { hesaplaStokDegeri } from '../../../utils/project/stokKarti';
 import DepoModal from '../modal/DepoModal';
 import GenelBilgiler from './GenelBilgiler';
 import styles from './StokKartiCard.module.scss';
@@ -91,6 +93,7 @@ function StokKartiCard({
 
   const { setValues } = formik;
 
+
   useEffect(() => {
     if (recordId === undefined) return;
 
@@ -107,11 +110,13 @@ function StokKartiCard({
     load();
   }, [recordId, setValues]);
 
-
+  
   const stokDegeri = useMemo(
-    () => formik.values.stokMiktari * formik.values.birimFiyat,
+    () =>
+      hesaplaStokDegeri(formik.values.stokMiktari, formik.values.birimFiyat),
     [formik.values.stokMiktari, formik.values.birimFiyat],
   );
+
 
   const handleDepoSelect = (depo: Depo) => {
     formik.setValues({
@@ -122,74 +127,130 @@ function StokKartiCard({
     setDepoModalOpen(false);
   };
 
+  const title = isNew ? 'Yeni Stok Kartı' : `Stok Kartı #${recordId}`;
+
+ 
   const wrap = (body: ReactNode) =>
     isInModal ? (
       <div className={styles.overlay}>
         <div
-          className={`${styles.dialog} ${styles.dialogLarge}`}
+          className={styles.cardDialog}
           role="dialog"
           aria-modal="true"
+          aria-label={title}
         >
           {body}
         </div>
       </div>
     ) : (
-      <div>{body}</div>
+      <div className={styles.pageRoot}>{body}</div>
     );
 
-  const title = isNew ? 'Yeni Stok Kartı' : `Stok Kartı #${recordId}`;
-
-  if (loading) return wrap(<p>Yükleniyor…</p>);
+  if (loading) return wrap(<p className={styles.message}>Yükleniyor…</p>);
 
   if (error) {
     return wrap(
-      <>
+      <div className={styles.message}>
         <p>Hata: {error}</p>
         {isInModal ? (
-          <button type="button" onClick={onClose}>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={onClose}
+          >
             Kapat
           </button>
         ) : (
-          <Link to="/stok-karti">← Listeye dön</Link>
+          <Link to="/stok-karti" className={styles.secondaryButton}>
+            ← Listeye dön
+          </Link>
         )}
-      </>,
+      </div>,
     );
   }
 
   return wrap(
     <>
-      {isInModal ? (
-        <h2>{title}</h2>
-      ) : (
-        <>
-          <Link to="/stok-karti">← Listeye dön</Link>
-          <h1>{title}</h1>
-        </>
-      )}
+      <header className={styles.header}>
+        <div className={styles.headerMain}>
+          {!isInModal && (
+            <Link
+              to="/stok-karti"
+              className={styles.back}
+              aria-label="Listeye dön"
+            >
+              ←
+            </Link>
+          )}
+          <h1 className={styles.headerTitle}>{title}</h1>
+        </div>
 
-      <form onSubmit={formik.handleSubmit}>
-        <GenelBilgiler formik={formik} stokDegeri={stokDegeri} />
+        <div className={styles.headerSide}>
+          <span
+            className={`${styles.pill} ${
+              formik.values.durum === Durum.Aktif
+                ? styles.pillActive
+                : styles.pillPassive
+            }`}
+          >
+            {DURUM_LABEL[formik.values.durum]}
+          </span>
+          {isInModal && (
+            <button
+              type="button"
+              className={styles.closeButton}
+              aria-label="Kapat"
+              onClick={onClose}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </header>
 
-        <section>
-          <h2>Depo Bilgileri</h2>
-          <p>
-            Depo: <strong>{formik.values.depoAdi || 'Seçilmedi'}</strong>
-          </p>
-          <button type="button" onClick={() => setDepoModalOpen(true)}>
-            Depo Seç
+      <form onSubmit={formik.handleSubmit} className={styles.form}>
+        <div className={styles.body}>
+          <GenelBilgiler formik={formik} stokDegeri={stokDegeri} />
+
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Depo Bilgileri</h2>
+            <div className={styles.depoRow}>
+              <span className={styles.depoValue}>
+                {formik.values.depoAdi || 'Depo seçilmedi'}
+              </span>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => setDepoModalOpen(true)}
+              >
+                Depo Seç
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div className={styles.actions}>
+          <button
+            type="submit"
+            className={styles.primaryButton}
+            disabled={formik.isSubmitting}
+          >
+            Kaydet
           </button>
-        </section>
-
-        <button type="submit" disabled={formik.isSubmitting}>
-          Kaydet
-        </button>
-        {isInModal ? (
-          <button type="button" onClick={onClose}>
-            İptal
-          </button>
-        ) : (
-          <Link to="/stok-karti">İptal</Link>
-        )}
+          {isInModal ? (
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={onClose}
+            >
+              Vazgeç
+            </button>
+          ) : (
+            <Link to="/stok-karti" className={styles.secondaryButton}>
+              Vazgeç
+            </Link>
+          )}
+        </div>
       </form>
 
       {depoModalOpen && (
