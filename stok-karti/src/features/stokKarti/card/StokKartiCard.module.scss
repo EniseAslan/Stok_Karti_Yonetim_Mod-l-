@@ -17,6 +17,10 @@
   background: #fff;
 }
 
+.dialogLarge {
+  width: min(640px, 92vw);
+}
+
 .depoList {
   display: flex;
   flex-direction: column;

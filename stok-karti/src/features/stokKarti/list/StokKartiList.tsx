@@ -12,6 +12,7 @@ import {
   type Kategori,
   type StokKarti,
 } from '../../../types/stokKarti.types';
+import StokKartiCard from '../card/StokKartiCard';
 import styles from './StokKartiList.module.scss';
 
 type KategoriFilter = Kategori | 'ALL';
@@ -26,6 +27,7 @@ function StokKartiList() {
   const [kategoriFilter, setKategoriFilter] = useState<KategoriFilter>('ALL');
   const [durumFilter, setDurumFilter] = useState<DurumFilter>('ALL');
   const [notification, setNotification] = useState<string | null>(null);
+  const [quickEditId, setQuickEditId] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -41,6 +43,7 @@ function StokKartiList() {
     load();
   }, []);
 
+
   const q = search.toLocaleLowerCase('tr-TR');
 
   const filtered = items.filter((item) => {
@@ -53,6 +56,11 @@ function StokKartiList() {
     return matchesSearch && matchesKategori && matchesDurum;
   });
 
+  const showNotification = (message: string) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const handleDelete = async (id: number) => {
     const ok = window.confirm('Bu kaydı silmek istediğinize emin misiniz?');
     if (!ok) return;
@@ -60,11 +68,18 @@ function StokKartiList() {
     try {
       await deleteStokKarti(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
-      setNotification('Kayıt silindi');
-      setTimeout(() => setNotification(null), 3000);
+      showNotification('Kayıt silindi');
     } catch {
       window.alert('Silme işlemi başarısız oldu.');
     }
+  };
+
+  const handleQuickSaved = (saved: StokKarti) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === saved.id ? saved : item)),
+    );
+    setQuickEditId(null);
+    showNotification('Kayıt güncellendi');
   };
 
   if (loading) return <p>Yükleniyor…</p>;
@@ -153,6 +168,9 @@ function StokKartiList() {
                 <td>{item.depoAdi}</td>
                 <td>
                   <Link to={`/stok-karti/${item.id}`}>Düzenle</Link>
+                  <button onClick={() => setQuickEditId(item.id)}>
+                    Hızlı Düzenle
+                  </button>
                   <button onClick={() => handleDelete(item.id)}>Sil</button>
                 </td>
               </tr>
@@ -160,6 +178,15 @@ function StokKartiList() {
           )}
         </tbody>
       </table>
+
+      {quickEditId !== null && (
+        <StokKartiCard
+          isInModal
+          stokId={quickEditId}
+          onSaved={handleQuickSaved}
+          onClose={() => setQuickEditId(null)}
+        />
+      )}
     </div>
   );
 }
