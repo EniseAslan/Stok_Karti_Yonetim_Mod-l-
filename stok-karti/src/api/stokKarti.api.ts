@@ -1,4 +1,4 @@
-import type { StokKarti,StokKartiForm } from '../types/stokKarti.types';
+import type { StokKarti,StokKartiForm, Depo } from '../types/stokKarti.types';
 
 const BASE_URL = 'http://localhost:3001';
 
@@ -48,6 +48,14 @@ export async function updateStokKarti(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+  if (!res.ok) {
+    throw new Error(`Server error: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function getDepolar(): Promise<Depo[]> {
+  const res = await fetch(`${BASE_URL}/depolar`);
   if (!res.ok) {
     throw new Error(`Server error: ${res.status}`);
   }

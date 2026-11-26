@@ -11,8 +11,10 @@ import {
   Birim,
   Durum,
   Kategori,
+  type Depo,
   type StokKartiForm,
 } from '../../../types/stokKarti.types';
+import DepoModal from '../modal/DepoModal';
 import GenelBilgiler from './GenelBilgiler';
 
 const validationSchema = Yup.object({
@@ -46,6 +48,7 @@ function StokKartiCard() {
 
   const [loading, setLoading] = useState<boolean>(!isNew);
   const [error, setError] = useState<string | null>(null);
+  const [depoModalOpen, setDepoModalOpen] = useState<boolean>(false);
 
   const formik = useFormik<StokKartiForm>({
     initialValues: EMPTY_FORM,
@@ -82,11 +85,19 @@ function StokKartiCard() {
     load();
   }, [id, isNew, setValues]);
 
-
   const stokDegeri = useMemo(
     () => formik.values.stokMiktari * formik.values.birimFiyat,
     [formik.values.stokMiktari, formik.values.birimFiyat],
   );
+
+  const handleDepoSelect = (depo: Depo) => {
+    formik.setValues({
+      ...formik.values,
+      depoId: depo.id,
+      depoAdi: depo.adi,
+    });
+    setDepoModalOpen(false);
+  };
 
   if (loading) return <p>Yükleniyor…</p>;
   if (error) {
@@ -106,11 +117,28 @@ function StokKartiCard() {
       <form onSubmit={formik.handleSubmit}>
         <GenelBilgiler formik={formik} stokDegeri={stokDegeri} />
 
+        <section>
+          <h2>Depo Bilgileri</h2>
+          <p>
+            Depo: <strong>{formik.values.depoAdi || 'Seçilmedi'}</strong>
+          </p>
+          <button type="button" onClick={() => setDepoModalOpen(true)}>
+            Depo Seç
+          </button>
+        </section>
+
         <button type="submit" disabled={formik.isSubmitting}>
           Kaydet
         </button>
         <Link to="/stok-karti">İptal</Link>
       </form>
+
+      {depoModalOpen && (
+        <DepoModal
+          onSelect={handleDepoSelect}
+          onClose={() => setDepoModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -67,3 +67,8 @@ export interface StokKarti {
 
 export type StokKartiForm = Omit<StokKarti, 'id'>;
 
+export interface Depo {
+  id: number;
+  adi: string;
+}
+
