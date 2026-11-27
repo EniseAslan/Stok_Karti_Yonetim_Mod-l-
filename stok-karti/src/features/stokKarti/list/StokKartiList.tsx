@@ -16,7 +16,7 @@ import {
   formatCurrency,
   formatNumber,
   hesaplaStokDegeri,
-} from '../../../utils/project/stokKarti';
+} from '../../../utils/_project/stokKarti';
 import StokKartiCard from '../card/StokKartiCard';
 import styles from './StokKartiList.module.scss';
 

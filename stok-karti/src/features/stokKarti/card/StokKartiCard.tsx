@@ -17,7 +17,7 @@ import {
   type StokKarti,
   type StokKartiForm,
 } from '../../../types/stokKarti.types';
-import { hesaplaStokDegeri } from '../../../utils/project/stokKarti';
+import { hesaplaStokDegeri } from '../../../utils/_project/stokKarti';
 import DepoModal from '../modal/DepoModal';
 import GenelBilgiler from './GenelBilgiler';
 import styles from './StokKartiCard.module.scss';

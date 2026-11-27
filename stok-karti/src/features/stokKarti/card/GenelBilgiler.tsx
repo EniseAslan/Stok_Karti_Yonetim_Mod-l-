@@ -6,7 +6,7 @@ import {
   KATEGORI_OPTIONS,
   type StokKartiForm,
 } from '../../../types/stokKarti.types';
-import { formatCurrency } from '../../../utils/project/stokKarti';
+import { formatCurrency } from '../../../utils/_project/stokKarti';
 import styles from './StokKartiCard.module.scss';
 
 interface GenelBilgilerProps {
