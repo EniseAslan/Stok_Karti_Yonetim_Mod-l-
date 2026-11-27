@@ -56,9 +56,9 @@
       "birim": "ADET",
       "stokMiktari": 130,
       "birimFiyat": 1250,
-      "durum": "AKTIF",
-      "depoId": 3,
-      "depoAdi": "Sevkiyat Deposu"
+      "durum": "PASIF",
+      "depoId": 2,
+      "depoAdi": "Üretim Deposu"
     },
     {
       "id": 6,
@@ -69,8 +69,20 @@
       "stokMiktari": 75,
       "birimFiyat": 2100,
       "durum": "AKTIF",
-      "depoId": 2,
-      "depoAdi": "Üretim Deposu"
+      "depoId": 3,
+      "depoAdi": "Sevkiyat Deposu"
+    },
+    {
+      "ad": "JBL Tune 520BT",
+      "kod": "HM-0023",
+      "kategori": "TICARI",
+      "birim": "ADET",
+      "stokMiktari": 10,
+      "birimFiyat": 1700,
+      "durum": "AKTIF",
+      "depoId": 3,
+      "depoAdi": "Sevkiyat Deposu",
+      "id": 7
     }
   ],
   "depolar": [

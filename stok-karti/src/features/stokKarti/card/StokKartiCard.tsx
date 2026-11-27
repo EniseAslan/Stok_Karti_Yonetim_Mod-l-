@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
   createStokKarti,
+  deleteStokKarti,
   getStokKarti,
   updateStokKarti,
 } from '../../../api/stokKarti.api';
@@ -60,20 +61,21 @@ function StokKartiCard({
 }: StokKartiCardProps) {
   const params = useParams();
   const navigate = useNavigate();
-
-
   const routeId = params.id !== undefined ? Number(params.id) : undefined;
   const recordId = isInModal ? stokId : routeId;
   const isNew = recordId === undefined;
 
   const [loading, setLoading] = useState<boolean>(!isNew);
   const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<boolean>(false);
   const [depoModalOpen, setDepoModalOpen] = useState<boolean>(false);
 
   const formik = useFormik<StokKartiForm>({
     initialValues: EMPTY_FORM,
     validationSchema,
     onSubmit: async (values) => {
+      setSaveError(null);
       try {
         const saved =
           recordId === undefined
@@ -83,10 +85,19 @@ function StokKartiCard({
         if (isInModal) {
           onSaved?.(saved);
         } else {
-          navigate('/stok-karti');
+          navigate('/stok-karti', {
+            state: {
+              notification:
+                recordId === undefined
+                  ? 'Kayıt oluşturuldu'
+                  : 'Kayıt güncellendi',
+            },
+          });
         }
       } catch {
-        window.alert('Kayıt başarısız oldu.');
+        setSaveError(
+          'Kayıt kaydedilemedi. Sunucuya ulaşılamıyor olabilir, lütfen tekrar deneyin.',
+        );
       }
     },
   });
@@ -102,7 +113,8 @@ function StokKartiCard({
         const data = await getStokKarti(recordId);
         setValues(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Bilinmeyen hata');
+        const message = err instanceof Error ? err.message : 'Bilinmeyen hata';
+        setError(message.includes('404') ? 'Kayıt bulunamadı.' : message);
       } finally {
         setLoading(false);
       }
@@ -110,13 +122,12 @@ function StokKartiCard({
     load();
   }, [recordId, setValues]);
 
-  
+
   const stokDegeri = useMemo(
     () =>
       hesaplaStokDegeri(formik.values.stokMiktari, formik.values.birimFiyat),
     [formik.values.stokMiktari, formik.values.birimFiyat],
   );
-
 
   const handleDepoSelect = (depo: Depo) => {
     formik.setValues({
@@ -127,9 +138,27 @@ function StokKartiCard({
     setDepoModalOpen(false);
   };
 
-  const title = isNew ? 'Yeni Stok Kartı' : `Stok Kartı #${recordId}`;
-
  
+  const handleDelete = async () => {
+    if (recordId === undefined) return;
+
+    const ok = window.confirm('Bu kaydı silmek istediğinize emin misiniz?');
+    if (!ok) return;
+
+    setSaveError(null);
+    setDeleting(true);
+    try {
+      await deleteStokKarti(recordId);
+      navigate('/stok-karti', { state: { notification: 'Kayıt silindi' } });
+    } catch {
+      setSaveError('Silme işlemi başarısız oldu. Lütfen tekrar deneyin.');
+      setDeleting(false);
+    }
+  };
+
+  const title = isNew ? 'Yeni Stok Kartı' : `Stok Kartı #${recordId}`;
+  const showValidationSummary = formik.submitCount > 0 && !formik.isValid;
+
   const wrap = (body: ReactNode) =>
     isInModal ? (
       <div className={styles.overlay}>
@@ -210,6 +239,12 @@ function StokKartiCard({
 
       <form onSubmit={formik.handleSubmit} className={styles.form}>
         <div className={styles.body}>
+          {(saveError || showValidationSummary) && (
+            <div className={styles.alert} role="alert">
+              {saveError ?? 'Lütfen işaretli alanları düzeltin.'}
+            </div>
+          )}
+
           <GenelBilgiler formik={formik} stokDegeri={stokDegeri} />
 
           <section className={styles.section}>
@@ -233,7 +268,7 @@ function StokKartiCard({
           <button
             type="submit"
             className={styles.primaryButton}
-            disabled={formik.isSubmitting}
+            disabled={formik.isSubmitting || deleting}
           >
             Kaydet
           </button>
@@ -249,6 +284,16 @@ function StokKartiCard({
             <Link to="/stok-karti" className={styles.secondaryButton}>
               Vazgeç
             </Link>
+          )}
+          {!isInModal && !isNew && (
+            <button
+              type="button"
+              className={`${styles.secondaryButton} ${styles.dangerButton}`}
+              disabled={formik.isSubmitting || deleting}
+              onClick={handleDelete}
+            >
+              Sil
+            </button>
           )}
         </div>
       </form>
